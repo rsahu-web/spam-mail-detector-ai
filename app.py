@@ -19,7 +19,7 @@ if not LOG_FILE.exists():
 
 app = Flask(__name__)
 
-# ==== Your original feature extractor classes stay unchanged ====
+# ==== Your original feature extractor classes stay unchanged ==== 
 
 SUSPICIOUS_WORDS = {
     'verify','account','password','click','login','urgent','suspend','update',
@@ -57,6 +57,20 @@ def make_meta(X_df):
     texts = X_df['text'].astype(str).to_numpy()
     meta = SimpleMetaFeatures().transform(texts)
     return meta
+
+# <<< ADDED: ensure unpickling can find `make_meta` under __main__ (safe compatibility shim)
+# This does not change the model. It simply exposes the make_meta name in __main__
+# so joblib/pickle can resolve it when loading a model trained where make_meta
+# existed in __main__ during serialization.
+import sys
+try:
+    # If __main__ exists, set the attribute there so unpickling won't fail
+    if '__main__' in sys.modules:
+        setattr(sys.modules['__main__'], 'make_meta', make_meta)
+except Exception:
+    # If this fails for any reason, ignore: the model load will still be attempted below
+    pass
+# <<< END ADDED
 
 # ==== Pipeline loading logic unchanged ====
 PIPELINE_PATH = "pipeline.joblib"
