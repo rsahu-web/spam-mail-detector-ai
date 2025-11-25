@@ -8,8 +8,7 @@ from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-A = pd.read_csv("C:\\Users\\Laxmikant\\OneDrive\\Desktop\\NEW FOLDER\\mail_data.csv")
-
+A = pd.read_csv("mail_data.csv")
 
 X = A['Message']
 Y = A['Category']

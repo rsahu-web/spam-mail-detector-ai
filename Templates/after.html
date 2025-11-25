@@ -1,58 +1,101 @@
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Detection result</title>
 
-  <link rel="stylesheet" type="text/css" href="/static/CSS/after.css">
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <title>detection result</title>
+  <!-- Custom theme -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='CSS/custom.css') }}">
+
+  <!-- Optional legacy CSS -->
 </head>
 <body>
- {%if data == 'ham' %}
+  <div class="container">
+    <div class="result-wrap">
 
-      <div id="outerContainer">
-    <div id="container">
-      <div class="item">
-        <img src="{{url_for('static', filename='no.png')}}" />
+      <!-- Badge -->
+      <div class="text-center mb-3">
+        {% if data == 'LEGIT' %}
+          <div class="badge-big badge-legit">SAFE</div>
+        {% else %}
+          <div class="badge-big badge-phish">PHISH</div>
+        {% endif %}
       </div>
-      <div class="circle no" style="animation-delay: 0s"></div>
-      <div class="circle no" style="animation-delay: 1s"></div>
-      <div class="circle no" style="animation-delay: 2s"></div>
-      <div class="circle no" style="animation-delay: 3s"></div>
+
+      <!-- Probability bar -->
+      <div class="text-center">
+        <div class="prob-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ prob_percent|default(0) }}">
+          {% if data == 'LEGIT' %}
+            <div class="prob-fill legit" style="width: {{ prob_percent|default(0) }}%"></div>
+          {% else %}
+            <div class="prob-fill phish" style="width: {{ prob_percent|default(0) }}%"></div>
+          {% endif %}
+        </div>
+        <div class="prob-text">Phish probability: <strong>{{ prob if prob is not none else 'N/A' }}</strong></div>
+      </div>
+
+      <!-- Verdict -->
+      <div class="text-center mt-3">
+        {% if data == 'LEGIT' %}
+          <div class="desc"><strong>The message is clean.</strong> <mark>No</mark> spam detected.</div>
+        {% else %}
+          <div class="desc text-danger"><strong>Warning:</strong> This message looks like phishing — handle with caution.</div>
+        {% endif %}
+      </div>
+
+      <!-- Original message -->
+      {% if original_text %}
+        <div class="message-box mt-4 mx-auto">
+          {{ original_text }}
+        </div>
+      {% endif %}
+
+      <!-- Explainability -->
+      {% if suspicious %}
+        <div class="explain-block mt-3 mx-auto">
+          <strong>Suspicious tokens detected:</strong>
+          <div style="margin-top:8px;">
+            {% for w in suspicious %}
+              <span class="chip">{{ w }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      {% if urls %}
+        <div class="explain-block mt-2 mx-auto">
+          <strong>URLs found:</strong>
+          <ul>
+            {% for u in urls %}
+              <li><a href="{{ u }}" target="_blank" rel="noopener noreferrer">{{ u }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      <div class="back-wrap">
+    <a href="/" class="back-btn">← Back</a>
+</div>
+
+
+      <div class="app-footer mt-3 text-center"><small>Developed by Ram | 2025</small></div>
+
     </div>
   </div>
-  <center>
-    <h1>The message is clear. <mark>No</mark> Spam deteted.</h1>
-    <a href='/'>go back to home page</a>
-  </center>
-  </div>
 
-
-    {%else%}
-    <div id="outerContainer">
-        <div id="container">
-          <div class="item">
-            <img src="{{url_for('static', filename='YES.png')}}" />
-          </div>
-          <div class="circle yes" style="animation-delay: 0s"></div>
-          <div class="circle yes" style="animation-delay: 1s"></div>
-          <div class="circle yes" style="animation-delay: 2s"></div>
-          <div class="circle yes" style="animation-delay: 3s"></div>
-        </div>
-        <center>
-            <h1> Spam message detected !!</h1>
-            <a href='/'>go back to home page</a>
-          </center>
-          </div>
-        
-    {%endif%}
-
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      const fill = document.querySelector('.prob-fill');
+      if(fill){
+        const w = fill.style.width || '0%';
+        setTimeout(()=> fill.style.width = w, 80);
+      }
+    });
+  </script>
 
 </body>
-
 </html>
-
-
-
-
-
-
